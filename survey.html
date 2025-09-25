@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>用户问卷调查</title>
+		<style>
+			body {
+				font-family: "Helvetica Neue", sans-serif;
+				margin: 0;
+				padding: 20px;
+				background-color: #f7f7f7;
+			}
+
+			.container {
+				max-width: 400px;
+				margin: auto;
+				background: #fff;
+				padding: 20px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			h2 {
+				text-align: center;
+				margin-bottom: 20px;
+			}
+
+			label {
+				display: block;
+				margin-top: 15px;
+				font-weight: bold;
+			}
+
+			input[type="text"],
+			textarea,
+			select {
+				width: 100%;
+				padding: 10px;
+				margin-top: 5px;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+			}
+
+			.checkbox-group,
+			.radio-group {
+				margin-top: 10px;
+			}
+
+			button {
+				margin-top: 20px;
+				width: 100%;
+				padding: 12px;
+				background-color: #007bff;
+				color: white;
+				border: none;
+				border-radius: 5px;
+				font-size: 16px;
+			}
+
+			button:disabled {
+				background-color: #aaa;
+			}
+
+			.success {
+				text-align: center;
+				color: green;
+				margin-top: 15px;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div class="container">
+			<h2>用户满意度调查</h2>
+			<form id="surveyForm">
+				<label>1. 您的姓名：</label>
+				<input type="text" name="name" required />
+
+				<label>2. 您的年龄：</label>
+				<select name="age" required>
+					<option value="">请选择</option>
+					<option value="18-25">18-25岁</option>
+					<option value="26-35">26-35岁</option>
+					<option value="36-45">36-45岁</option>
+					<option value="46+">46岁以上</option>
+				</select>
+
+				<label>3. 您对我们的服务满意吗？</label>
+				<div class="radio-group">
+					<label><input type="radio" name="satisfaction" value="非常满意" required /> 非常满意</label>
+					<label><input type="radio" name="satisfaction" value="满意" /> 满意</label>
+					<label><input type="radio" name="satisfaction" value="一般" /> 一般</label>
+					<label><input type="radio" name="satisfaction" value="不满意" /> 不满意</label>
+				</div>
+
+				<label>4. 您希望我们改进的地方（可多选）：</label>
+				<div class="checkbox-group">
+					<label><input type="checkbox" name="improve" value="界面设计" /> 界面设计</label>
+					<label><input type="checkbox" name="improve" value="功能丰富度" /> 功能丰富度</label>
+					<label><input type="checkbox" name="improve" value="响应速度" /> 响应速度</label>
+					<label><input type="checkbox" name="improve" value="客服服务" /> 客服服务</label>
+				</div>
+
+				<label>5. 您的建议：</label>
+				<textarea name="suggestion" rows="4"></textarea>
+
+				<button type="submit">提交问卷</button>
+				<div class="success" id="successMsg" style="display:none;">感谢您的参与！</div>
+			</form>
+		</div>
+
+		<script>
+			const scriptURL = 'https://script.google.com/macros/s/AKfycbw1hhclegBDRkbfI8VUexhICT0YFw9QQ9noutIFNMO28ZO5ZmJLm2XqHWocOCt2PmXouQ/exec'; // ⚠️替换为你的地址
+
+			const form = document.forms['surveyForm'];
+			const successMsg = document.getElementById('successMsg');
+
+			form.addEventListener('submit', e => {
+				e.preventDefault();
+				const btn = form.querySelector('button');
+				btn.disabled = true;
+				btn.textContent = '提交中...';
+
+				// 收集数据
+				const data = new URLSearchParams();
+				data.append('name', form.name.value);
+				data.append('age', form.age.value);
+				data.append('satisfaction', form.satisfaction.value);
+				const improvements = [];
+				form.querySelectorAll('input[name="improve"]:checked').forEach(cb => improvements.push(cb.value));
+				data.append('improve', improvements.join(', '));
+				data.append('suggestion', form.suggestion.value);
+
+				fetch(scriptURL, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'text/plain;charset=utf-8'
+						},
+						body: data.toString()
+					})
+					.then(() => {
+						successMsg.style.display = 'block';
+						form.reset();
+						btn.disabled = false;
+						btn.textContent = '提交问卷';
+					})
+					.catch(error => {
+						alert('提交失败，请重试');
+						btn.disabled = false;
+						btn.textContent = '提交问卷';
+					});
+			});
+		</script>
+
+	</body>
+</html>
